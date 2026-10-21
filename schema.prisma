@@ -1,0 +1,246 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+
+enum StaffRole { SUPER_ADMIN TALENT_MANAGER ENQUIRY_MANAGER CONTENT_EDITOR AUDITOR }
+enum Classification { INDEPENDENT_RESEARCH PUBLIC_EMPLOYER_LISTING AUTHORIZED_RECRUITMENT }
+enum OpportunityStatus { DRAFT PENDING_VERIFICATION ACTIVE UNDER_REVIEW EXPIRED WITHDRAWN REJECTED }
+enum AuthorizationStatus { NONE CLAIMED VERIFIED }
+enum WorkArrangement { REMOTE HYBRID ON_SITE }
+enum EmploymentType { FULL_TIME PART_TIME CONTRACT TEMPORARY INTERNSHIP OTHER }
+enum EnquiryStatus { NEW REVIEWED FOLLOW_UP_REQUIRED IN_DISCUSSION QUALIFIED CLOSED REJECTED }
+enum ConsentType { PRIVACY_ACK CV_PROCESSING FUTURE_OPPORTUNITIES }
+enum PublishState { DRAFT PUBLISHED }
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String?
+  role         StaffRole
+  active       Boolean   @default(true)
+  mfaSecret    String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  sessions     Session[]
+  resetTokens  PasswordResetToken[]
+  notes        InternalNote[]
+  assignments  EnquiryAssignment[]
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+}
+
+model Opportunity {
+  id                  String              @id @default(cuid())
+  slug                String              @unique
+  title               String
+  employerName        String?
+  employerWebsite     String?
+  location            String
+  country             String
+  workArrangement     WorkArrangement
+  remoteEligibility   String?
+  employmentType      EmploymentType
+  industry            String?
+  categories          String[]
+  salaryMin           Int?
+  salaryMax           Int?
+  salaryCurrency      String?
+  salaryPeriod        String?
+  summary             String
+  description         String
+  essentialReqs       String[]
+  preferredQuals      String[]
+  deadline            DateTime?
+  employerPostedAt    DateTime?
+  lastVerifiedAt      DateTime?
+  publishedAt         DateTime?
+  verificationNotes   String?
+  classification      Classification      @default(INDEPENDENT_RESEARCH)
+  authorizationStatus AuthorizationStatus @default(NONE)
+  status              OpportunityStatus   @default(DRAFT)
+  createdById         String?
+  updatedById         String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  sources             OpportunitySource[]
+  authorization       AuthorizationRecord?
+  @@index([status, publishedAt])
+  @@index([country, workArrangement, employmentType])
+}
+
+model OpportunitySource {
+  id             String      @id @default(cuid())
+  opportunityId  String
+  opportunity    Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  sourceUrl      String
+  applicationUrl String?
+  isPrimary      Boolean     @default(false)
+  checkedAt      DateTime
+}
+
+model AuthorizationRecord {
+  id            String      @id @default(cuid())
+  opportunityId String      @unique
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  evidenceRef   String
+  reviewedById  String?
+  reviewedAt    DateTime?
+  createdAt     DateTime    @default(now())
+}
+
+model CandidateEnquiry {
+  id             String        @id @default(cuid())
+  reference      String        @unique
+  idempotencyKey String?       @unique
+  fullName       String
+  email          String
+  phone          String?
+  category       String
+  opportunityId  String?
+  message        String
+  contactMethod  String
+  status         EnquiryStatus @default(NEW)
+  emailStatus    String        @default("not_attempted")
+  createdAt      DateTime      @default(now())
+  consents       ConsentRecord[]
+  documents      PrivateDocument[]
+  assignments    EnquiryAssignment[]
+  notes          InternalNote[]
+  @@index([status, createdAt])
+}
+
+model EmployerEnquiry {
+  id             String        @id @default(cuid())
+  reference      String        @unique
+  idempotencyKey String?       @unique
+  organization   String
+  contactName    String
+  email          String
+  website        String
+  service        String
+  description    String
+  contactMethod  String
+  phone          String?
+  status         EnquiryStatus @default(NEW)
+  emailStatus    String        @default("not_attempted")
+  createdAt      DateTime      @default(now())
+  consents       ConsentRecord[]
+  assignments    EnquiryAssignment[]
+  notes          InternalNote[]
+  @@index([status, createdAt])
+}
+
+model PrivateDocument {
+  id          String           @id @default(cuid())
+  storageKey  String           @unique
+  mimeType    String
+  sizeBytes   Int
+  enquiryId   String
+  enquiry     CandidateEnquiry @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  uploadedAt  DateTime         @default(now())
+  deleteAfter DateTime
+}
+
+model ConsentRecord {
+  id            String            @id @default(cuid())
+  type          ConsentType
+  granted       Boolean
+  noticeVersion String
+  ipHash        String?
+  createdAt     DateTime          @default(now())
+  candidateId   String?
+  candidate     CandidateEnquiry? @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  employerId    String?
+  employer      EmployerEnquiry?  @relation(fields: [employerId], references: [id], onDelete: Cascade)
+}
+
+model EnquiryAssignment {
+  id          String            @id @default(cuid())
+  staffId     String
+  staff       AdminUser         @relation(fields: [staffId], references: [id])
+  candidateId String?
+  candidate   CandidateEnquiry? @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  employerId  String?
+  employer    EmployerEnquiry?  @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime          @default(now())
+}
+
+model InternalNote {
+  id          String            @id @default(cuid())
+  body        String
+  authorId    String?
+  author      AdminUser?        @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  candidateId String?
+  candidate   CandidateEnquiry? @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  employerId  String?
+  employer    EmployerEnquiry?  @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime          @default(now())
+}
+
+model SeoMetadata {
+  id          String    @id @default(cuid())
+  title       String?
+  description String?
+  ogImageUrl  String?
+  noindex     Boolean   @default(false)
+  sitePage    SitePage?
+  article     Article?
+}
+
+model SitePage {
+  id        String       @id @default(cuid())
+  key       String       @unique
+  title     String
+  body      String
+  state     PublishState @default(DRAFT)
+  seoId     String?      @unique
+  seo       SeoMetadata? @relation(fields: [seoId], references: [id])
+  updatedAt DateTime     @updatedAt
+}
+
+model Article {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  title       String
+  body        String
+  state       PublishState @default(DRAFT)
+  publishedAt DateTime?
+  seoId       String?      @unique
+  seo         SeoMetadata? @relation(fields: [seoId], references: [id])
+}
+
+model SiteSetting {
+  key   String @id
+  value Json
+}
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorEmail String?
+  action     String
+  entityType String
+  entityId   String?
+  meta       Json?
+  createdAt  DateTime @default(now())
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
