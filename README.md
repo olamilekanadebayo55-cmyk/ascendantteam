@@ -13,8 +13,8 @@ A static site: real HTML pages, one stylesheet (`styles.css`) and one script (`s
 - `CONFIG.careerServicesUrl`: the official Ascendant Career Services link, if it exists.
 
 ## Photography
-No photos are included (none could be licensed here). Each image position shows a designed graphic until you add a photo:
-1. Put an optimized photo (WebP or JPEG, about 1400px wide, under 250 KB) in a new `images/` folder.
+The hero photo is `hero-900.webp` and `hero-600.webp` (two sizes of one image; both must be uploaded). The Who we serve banner uses `serve-800.webp`, `serve-1200.webp`, `serve-1800.webp` (desktop sizes) and `serve-m.webp` (phone crop); upload all four. The About image position still shows a designed graphic until you add a photo:
+1. Put an optimized photo (WebP or JPEG, about 900px wide, under 250 KB) in the same folder as `index.html`, and use its file name as `src`.
 2. In `site.js`, fill `IMAGES.hero`, `IMAGES.serve` or `IMAGES.about` with `src`, `alt` (a real description) and `credit`.
 Shot list: hero, a single experienced professional reading or thinking by a window, natural light, not posed. Who we serve, a mentoring or one-to-one conversation, candid. About, a small working session. No handshakes, no staged smiles. Use licensed sources (e.g. Unsplash, Pexels, Stocksy, Adobe Stock) or your own photography, and never imply the people pictured work for Ascendant Talent.
 
@@ -26,3 +26,6 @@ Open any `.html` file on GitHub and use the pencil icon. Text is plain HTML. Art
 - Confirm every service on `services.html`, especially "Where offered" and "Where available".
 - Add the real team to `about.html` (with permission).
 - `sitemap.xml` and `robots.txt` use https://ascendantteam.vercel.app. Replace it with your final domain.
+
+## Hero photo licence
+Confirm that you hold the right to use the hero photo commercially. If it was made with an AI image tool, check that tool's commercial-use terms. If the licence requires a credit, add a line under the image in `index.html`. The site never states that the person pictured works for Ascendant Talent.
