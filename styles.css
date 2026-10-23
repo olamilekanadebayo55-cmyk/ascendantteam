@@ -39,3 +39,6 @@ footer.site{border-top:1.5px solid var(--navy);padding:76px 0 40px;font-size:15p
 @media(max-width:960px){.serve2{grid-template-columns:1fr;gap:36px}.hg,.intro,.serve,.two{grid-template-columns:1fr;gap:44px}.hg .phw{justify-self:start;max-width:340px}.trio{grid-template-columns:1fr}.trio>div,.trio>div+div{padding:22px 0;border-left:0;border-bottom:1px solid var(--line)}.row{grid-template-columns:48px 1fr;gap:10px 18px}.row p,.row .go{grid-column:2}.steps{grid-template-columns:1fr 1fr}.st:nth-child(n){margin-top:0}.pr{grid-template-columns:1fr}.fg{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.wide{--s:14px}.wf{margin-bottom:44px}body{font-size:17px}.wrap{padding:0 22px}.sec,.cta{padding:76px 0}.hero{padding-top:44px}.trio{margin-top:52px}.steps,.fm,.fg{grid-template-columns:1fr}.det{grid-template-columns:1fr;gap:8px}.det dl{grid-template-columns:1fr}.acts .btn{width:100%;justify-content:center}.hb{height:70px}nav{inset:70px 0 0}.pg1{padding:52px 0 40px}.body{padding:48px 0 80px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+/* images: never show alt text while loading or if a file is missing */
+.wide img,.ph img{font-size:0;color:transparent}.wf[hidden]{display:none}

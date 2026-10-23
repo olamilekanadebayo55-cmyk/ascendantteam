@@ -22,7 +22,7 @@ Shot list: hero, a single experienced professional reading or thinking by a wind
 Open any `.html` file on GitHub and use the pencil icon. Text is plain HTML. Articles are the `article-*.html` files; add one by copying an existing file and adding a row in `resources.html`.
 
 ## Before launch
-- Complete the bracketed items in `privacy.html`, `terms.html` and `disclaimer.html` and have them reviewed by a qualified professional. Remove the draft notice.
+- `privacy.html`, `terms.html` and `disclaimer.html` use general wording and have not been legally reviewed. Have a qualified professional review them and add specifics (for example a retention period, governing law and a privacy email).
 - Confirm every service on `services.html`, especially "Where offered" and "Where available".
 - Add the real team to `about.html` (with permission).
 - `sitemap.xml` and `robots.txt` use https://ascendantteam.vercel.app. Replace it with your final domain.
